@@ -8,3 +8,9 @@ Based on code written by David C. Sterratt and Judy Borowski.
 1. test against other values of theta
 2. improve run time of code (unneccesary pandas stuff?)
 3. try with SNL
+
+# Requirements
+Pathos
+Numpy
+Pandas
+Scipy
