@@ -7,6 +7,8 @@ Based on code written by David C. Sterratt and Judy Borowski.
 # To Do:
 1. test against other values of theta
 2. improve run time of code (unneccesary pandas stuff?)
+-- Use numba or cython to compile function?
+-- think harder about closing multiprocessing pools
 3. try with SNL
 
 # Requirements
