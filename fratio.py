@@ -56,7 +56,7 @@ def get_fratio_model(theta, ids=batch_tab.loc[batch_tab.batch_id.isin(batch_ids)
 
     with Pool(None) as p:
         out = p.map(func, ids)
-
+        p.close()
     return out
 
 #def plot_fratio(fratio, add=False):

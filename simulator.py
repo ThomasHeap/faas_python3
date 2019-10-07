@@ -1,33 +1,6 @@
-import rpy2
-import rpy2.robjects as robjects
+import fratio
 import numpy as np
-import pandas
-
-## import rpy2's package module
-import rpy2.robjects.packages as rpackages
-
-# import R's utility package
-utils = rpackages.importr('utils')
-
-# select a mirror for R packages
-utils.chooseCRANmirror(ind=1) # select the first mirror in the list
-
-# R package names
-packnames = ('deSolve', 'cOde')
-
-# R vector of strings
-from rpy2.robjects import rinterface, r, IntVector, FloatVector, StrVector
-
-# Selectively install what needs to be install.
-# We are fancy, just because we can.
-names_to_install = [x for x in packnames if not rpackages.isinstalled(x)]
-if len(names_to_install) > 0:
-    utils.install_packages(StrVector(names_to_install))
-
-robjects.r('''source("fratio.R")''')
-robjects.r('''options(mc.cores=8)''')
-
-
+import pandas as pd
 
 class faas_Model():
 
@@ -60,11 +33,11 @@ class faas_Model():
         self.time = np.genfromtxt('data/time_points.csv', delimiter=',')
 
         ## This gets a starting point for the parameters, excluding any noise term
-        self.rget_theta0 = robjects.r['get_theta0']
+        self.rget_theta0 = fratio.get_theta0
 
-        self.rget_fratio_exp = robjects.r['get_fratio_exp']
-        self.rget_fratio_model = robjects.r['get_fratio_model']
-        self.rget_exp = robjects.r['get_exp']
+        self.rget_fratio_exp = fratio.get_fratio_exp
+        self.rget_fratio_model = fratio.get_fratio_model
+        self.rget_exp = fratio.get_exp
         self.theta0 = self.rget_theta0()
 
         # Compute the mean
@@ -72,20 +45,21 @@ class faas_Model():
 
     # Generate realisation of \mu
 
-    def forward(self, theta, seed):
+    def forward(self, th, seed):
 
         # Set the seed
         np.random.seed(seed)
 
+
+        theta = pd.Series(th)
+        theta.index = ['logK_on_TN', 'logK_on_TC', 'logK_on_RN', 'logK_on_RC', 'logK_D_TN', 'logK_D_TC', 'logK_D_RN', 'logK_D_RC', 'm_alpha', 'alpha0'] + ['epsilon' + str(i) for i in np.arange(0,94)]
         ## Gives a 94-element list of matrices with time and fratio columns -
         ## note that t=0 is present
-        theta = FloatVector(theta)
-        theta.names = self.theta0.names[8:]
-
-
 
         x_model = self.rget_fratio_model(theta)
-        x = [list(x_model[i].rx(True,2)) for i in range(len(x_model))]
+        #print(x_model[0].iloc[:,1])
+        x = [list(x_model[i].iloc[:,1]) for i in range(len(x_model))]
+        #print(x[0])
         length = max(map(len, x))
         fra=np.array([xi+[xi[-1]]*(length-len(xi)) for xi in x])[:,1:]
 
@@ -121,7 +95,7 @@ class faas_Model():
     def data(self):
         x_exp = self.rget_fratio_exp()
 
-        x = [list(x_exp[i].rx(True,2)) for i in range(len(x_exp))]
+        x = [list(x_exp[i].iloc[:,1]) for i in range(len(x_exp))]
         length = max(map(len, x))
         fra=np.array([xi+[xi[-1]]*(length-len(xi)) for xi in x])
 

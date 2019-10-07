@@ -1,26 +1,28 @@
 from preFLASH import *
+from numba import njit, jit
 from scipy.integrate import odeint
 
 ## Equations
+@njit
 def f_postflash(y,t,params):
     CaDMn_s, CaDMn_f, DMn_s, DMn_f, CaPP, PP, Ca, OGB5N, CaOGB5N, NtNt, CtCt, CaNtNr, CaCtCr, CaNrCaNr, CaCrCaCr = y
 
     #K_off_CaDMn, K_on_CaDMn, K_off_D, K_on_D, K_off_CaPP, K_f, K_s, K_on_TN, K_on_TC, K_on_RN, K_on_RC, K_off_TN, K_off_TC, K_off_RN, K_off_RC = params
-    K_off_CaDMn = params['K_off_CaDMn']
-    K_on_CaDMn = params['K_on_CaDMn']
-    K_off_D = params['K_off_D']
-    K_on_D = params['K_on_D']
-    K_off_CaPP = params['K_off_CaPP']
-    K_f = params['K_f']
-    K_s = params['K_s']
-    K_on_TN = params['K_on_TN']
-    K_on_TC = params['K_on_TC']
-    K_on_RN = params['K_on_RN']
-    K_on_RC = params['K_on_RC']
-    K_off_TN = params['K_off_TN']
-    K_off_TC = params['K_off_TC']
-    K_off_RN = params['K_off_RN']
-    K_off_RC = params['K_off_RC']
+    K_off_CaDMn = params[0]
+    K_on_CaDMn = params[1]
+    K_off_D = params[2]
+    K_on_D = params[3]
+    K_off_CaPP = params[4]
+    K_f = params[5]
+    K_s = params[6]
+    K_on_TN = params[7]
+    K_on_TC = params[8]
+    K_on_RN = params[9]
+    K_on_RC = params[10]
+    K_off_TN = params[11]
+    K_off_TC = params[12]
+    K_off_RN = params[13]
+    K_off_RC = params[14]
 
     f = np.array([
       -K_off_CaDMn*CaDMn_s + K_on_CaDMn*DMn_s*Ca - CaDMn_s*K_s,                                     #CaDMn_s
@@ -88,19 +90,19 @@ def postflash(theta=0, phi=get_exp(0)['par'], epsilon=0, time_points=0, hessian=
     pre_out.index = ['CaDMn', 'DMn', 'Ca', 'OGB5N', 'CaOGB5N', 'NtNt', 'CtCt', 'CaNtNr', 'CaCtCr', 'CaNrCaNr', 'CaCrCaCr']
 
     y = [
-    ((1-x)*alpha*pd.to_numeric(pre_out["CaDMn"])), #CaDMn_s
-    ( x   *alpha*pd.to_numeric(pre_out["CaDMn"])), #CaDMn_f
-    ((1-x)*alpha*pd.to_numeric(pre_out["DMn"])),   #DMn_s
-    ( x   *alpha*pd.to_numeric(pre_out["DMn"])),   #DMn_f
+    float((1-x)*alpha*pre_out["CaDMn"]), #CaDMn_s
+    float( x   *alpha*pre_out["CaDMn"]), #CaDMn_f
+    float((1-x)*alpha*pre_out["DMn"]),   #DMn_s
+    float( x   *alpha*pre_out["DMn"]),   #DMn_f
     0,                                             #CaPP
     0]                                             #PP
-    y = y + list(pre_out[["Ca", "OGB5N", "CaOGB5N", "NtNt", "CtCt", "CaNtNr", "CaCtCr", "CaNrCaNr", "CaCrCaCr"]])
+    y = y + list(pre_out[["Ca", "OGB5N", "CaOGB5N", "NtNt", "CtCt", "CaNtNr", "CaCtCr", "CaNrCaNr", "CaCrCaCr"]].to_list())
     ## solve the ODEs
     if (hessian):
         ## Not yet
         pass
     else:
-        post_out = odeint(f_postflash, y, times, args = (parms,), atol=1e-6, rtol=1e-6)
+        post_out = odeint(f_postflash, y, times, args = (parms.to_numpy(),), atol=1e-6, rtol=1e-6)
 
     ## Value of F_max/F_min
     F_ratio = phi['Ratio_D']

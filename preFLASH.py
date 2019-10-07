@@ -1,5 +1,5 @@
 from main import *
-#from numba import jit
+from numba import njit, jit
 import re
 from scipy.integrate import odeint
 
@@ -9,21 +9,22 @@ from scipy.integrate import odeint
 ## within one batch
 
 ## preflash ODEs
+@njit
 def f_preflash(y,t,params):
     CaDMn, DMn, Ca, OGB5N, CaOGB5N, NtNt, CtCt, CaNtNr, CaCtCr, CaNrCaNr, CaCrCaCr = y
 
-    K_off_CaDMn = params['K_off_CaDMn']
-    K_on_CaDMn = params['K_on_CaDMn']
-    K_off_D = params['K_off_D']
-    K_on_D = params['K_on_D']
-    K_on_TN = params['K_on_TN']
-    K_on_TC = params['K_on_TC']
-    K_on_RN = params['K_on_RN']
-    K_on_RC = params['K_on_RC']
-    K_off_TN = params['K_off_TN']
-    K_off_TC = params['K_off_TC']
-    K_off_RN = params['K_off_RN']
-    K_off_RC = params['K_off_RC']
+    K_off_CaDMn = params[0]
+    K_on_CaDMn = params[1]
+    K_off_D = params[2]
+    K_on_D = params[3]
+    K_on_TN = params[4]
+    K_on_TC = params[5]
+    K_on_RN = params[6]
+    K_on_RC = params[7]
+    K_off_TN = params[8]
+    K_off_TC = params[9]
+    K_off_RN = params[10]
+    K_off_RC = params[11]
 
     f = [-K_off_CaDMn*CaDMn + K_on_CaDMn*DMn*Ca,       #CaDMn
           K_off_CaDMn*CaDMn - K_on_CaDMn*DMn*Ca,       #DMn
@@ -66,22 +67,22 @@ def get_preflash_ss(theta, phi=get_exp(0)['par'], sensitivities=False):
     #print(parms)
 
     ## Calculation of initial Ca concentration
-    DMn0 = phi["DM_tot"]
-    Ca = phi["Ca_0"]
-    OGB5N0 = phi["D_tot"]
-    CaM0 = phi["B_tot"]
-    K_D = parms["K_off_D"]/parms["K_on_D"]
-    K_CaDMn =parms["K_off_CaDMn"]/parms["K_on_CaDMn"]
-    K_TN = parms["K_off_TN"]/parms["K_on_TN"]/2
-    K_RN = 2*parms["K_off_RN"]/parms["K_on_RN"]
-    K_TC = parms["K_off_TC"]/parms["K_on_TC"]/2
-    K_RC = 2*parms["K_off_RC"]/parms["K_on_RC"]
+    DMn0 = float(phi["DM_tot"])
+    Ca = float(phi["Ca_0"])
+    OGB5N0 = float(phi["D_tot"])
+    CaM0 = float(phi["B_tot"])
+    K_D = float(parms["K_off_D"]/parms["K_on_D"])
+    K_CaDMn = float(parms["K_off_CaDMn"]/parms["K_on_CaDMn"])
+    K_TN = float(parms["K_off_TN"]/parms["K_on_TN"]/2)
+    K_RN = float(2*parms["K_off_RN"]/parms["K_on_RN"])
+    K_TC = float(parms["K_off_TC"]/parms["K_on_TC"]/2)
+    K_RC = float(2*parms["K_off_RC"]/parms["K_on_RC"])
 
     Ca_initial = Ca + (Ca*DMn0)/(K_CaDMn + Ca) + (Ca*OGB5N0)/(K_D + Ca) + \
                  CaM0*(Ca*K_RN + 2*Ca**2)/(K_RN*K_TN + Ca*K_RN + Ca**2) + \
                  CaM0*(Ca*K_RC + 2*Ca**2)/(K_RC*K_TC + Ca*K_RC + Ca**2)
 
-    Ca_initial.columns = None
+    #Ca_initial.columns = None
 
     ## Initial concentrations
     y = [0,            #CaDMn
@@ -96,6 +97,8 @@ def get_preflash_ss(theta, phi=get_exp(0)['par'], sensitivities=False):
          0,            #CaNrCaNr
          0]            #CaCrCaCr
 
+    #print(y)
+
 
     ## Run simulation for 10 seconds - equilibrium is certainly reached
     ## within this time
@@ -103,7 +106,7 @@ def get_preflash_ss(theta, phi=get_exp(0)['par'], sensitivities=False):
     if sensitivities:
         out = odeint(f_preflash_s, y, times)
     else:
-        out = odeint(f_preflash, y, times, args = (parms,))
+        out = odeint(f_preflash, y, times, args = (parms.to_numpy(),))
 
     if ((np.isclose(out[-1,2], Ca)).all == True):
         print("Desired level of calcium", Ca, "not equal to actual level", out[-1,2])
