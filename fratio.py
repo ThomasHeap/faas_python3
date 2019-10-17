@@ -50,7 +50,7 @@ def get_fratio_model(theta, ids=batch_tab.loc[batch_tab.batch_id.isin(batch_ids)
                                    epsilon=theta[['epsilon' + str(id)]],
                                    time_points = pd.concat([pd.Series([0]),cur['time_point']]))
 
-        outp = pd.concat([cur['time_point'], pd.Series(F_ratio_course)],axis=1)
+        outp = pd.concat([pd.concat([pd.Series([0]),cur['time_point']], ignore_index=True), pd.Series(F_ratio_course)],axis=1)
 
         return(outp)
 
