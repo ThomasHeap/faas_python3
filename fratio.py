@@ -1,6 +1,8 @@
 from postFLASH import *
-from pathos.multiprocessing import Pool
+from multiprocessing import get_context, Pool
+from functools import partial
 import numpy as np
+
 
 ## Mapping of batc ids onto experiments
 batch_tab = pd.concat([pd.DataFrame({'batch_id':1, 'expVec':np.arange(0,13), 'name':'1021_WT_360'}),
@@ -34,33 +36,34 @@ def get_fratio_exp(ids=batch_tab.loc[batch_tab.batch_id.isin(batch_ids)]['expVec
 
     return fratios
 
+def func(id,thetaf):
+    cur = get_exp(id)
+    F_ratio_course = postflash(thetaf, phi=cur['par'],
+                               epsilon=thetaf[['epsilon' + str(id)]],
+                               time_points = pd.concat([pd.Series([0]),cur['time_point']]))
+
+    outp = pd.concat([pd.concat([pd.Series([0]),cur['time_point']], ignore_index=True), pd.Series(F_ratio_course)],axis=1)
+
+    return(outp)
+
 ## iterate through all batch_ids
 def get_fratio_model(theta, ids=batch_tab.loc[batch_tab.batch_id.isin(batch_ids)]['expVec']):
+    with get_context("spawn").Pool() as pool:
+        ## determine the experiment IDs and the batch name
+        ids = ids.reset_index(drop=True)
+        #ids = [0]
+        ## iterate through all experiments
+        ## run script that computes post-flash simulation, the F-ratio and the sensitivity based Hessian
+        theta = log10Kd_to_K(theta)
+        functheta = partial(func, thetaf=theta)
 
-    ## determine the experiment IDs and the batch name
-    ids = ids.reset_index(drop=True)
-    #ids = [0]
-    ## iterate through all experiments
-    ## run script that computes post-flash simulation, the F-ratio and the sensitivity based Hessian
-    theta = log10Kd_to_K(theta)
-
-    def func(id):
-        cur = get_exp(id)
-        F_ratio_course = postflash(theta, phi=cur['par'],
-                                   epsilon=theta[['epsilon' + str(id)]],
-                                   time_points = pd.concat([pd.Series([0]),cur['time_point']]))
-
-        outp = pd.concat([pd.concat([pd.Series([0]),cur['time_point']], ignore_index=True), pd.Series(F_ratio_course)],axis=1)
-
-        return(outp)
-
-    with Pool(None) as p:
-        out = p.map(func, ids)
-        p.close()
-    return out
+        out = pool.map(functheta, ids)
+        pool.close()
+        return out
 
 #def plot_fratio(fratio, add=False):
 ## Not needed
-th = get_theta0()
-k = get_fratio_model(th)
-print(k)
+# if __name__ == '__main__':
+#     th = get_theta0()
+#     k = get_fratio_model(th)
+#     print(len(k))
