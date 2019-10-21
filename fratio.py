@@ -1,5 +1,6 @@
 from postFLASH import *
 from multiprocessing import get_context, Pool
+#set_start_method('forkserver')
 from functools import partial
 import numpy as np
 
@@ -48,7 +49,7 @@ def func(id,thetaf):
 
 ## iterate through all batch_ids
 def get_fratio_model(theta, ids=batch_tab.loc[batch_tab.batch_id.isin(batch_ids)]['expVec']):
-    with get_context("spawn").Pool() as pool:
+    with get_context("forkserver").Pool() as pool:
         ## determine the experiment IDs and the batch name
         ids = ids.reset_index(drop=True)
         #ids = [0]
@@ -59,6 +60,7 @@ def get_fratio_model(theta, ids=batch_tab.loc[batch_tab.batch_id.isin(batch_ids)
 
         out = pool.map(functheta, ids)
         pool.close()
+        pool.join()
         return out
 
 #def plot_fratio(fratio, add=False):
