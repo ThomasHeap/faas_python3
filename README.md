@@ -4,12 +4,9 @@ Faas model for calmodulin translated from R into python3. Currently known to wor
 
 Based on code written by David C. Sterratt and Judy Borowski.
 
-# To Do:
-1. ~~test against other values of theta~~ - DONE
-2. improve run time of code (unneccesary pandas stuff?)
--- Use numba or cython to compile function? - faster but still slow, do some timing
--- think harder about closing multiprocessing pools~~ - DONE
-3. try with SNL
+# Issues:
+1. nan values for training and val loss, why does this happen?
+2. memory leak somewhere?
 
 # Requirements
 Pathos
