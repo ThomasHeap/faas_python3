@@ -1,7 +1,7 @@
 from main import *
-from numba import njit, jit
-import re
+#from numba import njit, jit
 from scipy.integrate import odeint
+#import time
 
 ## one specific experiment - determine here for main script
 ## originally, one experiment for each batch was computed as
@@ -9,7 +9,7 @@ from scipy.integrate import odeint
 ## within one batch
 
 ## preflash ODEs
-@njit
+#@njit(parallel=True)
 def f_preflash(y,t,params):
     CaDMn, DMn, Ca, OGB5N, CaOGB5N, NtNt, CtCt, CaNtNr, CaCtCr, CaNrCaNr, CaCrCaCr = y
 
@@ -26,7 +26,7 @@ def f_preflash(y,t,params):
     K_off_RN = params[10]
     K_off_RC = params[11]
 
-    f = [-K_off_CaDMn*CaDMn + K_on_CaDMn*DMn*Ca,       #CaDMn
+    f = np.asarray([-K_off_CaDMn*CaDMn + K_on_CaDMn*DMn*Ca,       #CaDMn
           K_off_CaDMn*CaDMn - K_on_CaDMn*DMn*Ca,       #DMn
           K_off_CaDMn*CaDMn - K_on_CaDMn*DMn*Ca \
          -K_on_D*OGB5N*Ca + K_off_D*CaOGB5N \
@@ -44,10 +44,44 @@ def f_preflash(y,t,params):
          -K_on_RC*CaCtCr*Ca + 2*K_off_RC*CaCrCaCr,     #CaCtCr
           K_on_RN*CaNtNr*Ca - 2*K_off_RN*CaNrCaNr,     #CaNrCaNr
           K_on_RC*CaCtCr*Ca - 2*K_off_RC*CaCrCaCr      #CaCrCaCr
-        ]
+        ])
     return f
 
-## Compute sensitivity equations
+#@jit(parallel=True)
+# def f_preflash_jac(y,t,params):
+#     CaDMn, DMn, Ca, OGB5N, CaOGB5N, NtNt, CtCt, CaNtNr, CaCtCr, CaNrCaNr, CaCrCaCr = y
+#
+#     K_off_CaDMn = params[0]
+#     K_on_CaDMn = params[1]
+#     K_off_D = params[2]
+#     K_on_D = params[3]
+#     K_on_TN = params[4]
+#     K_on_TC = params[5]
+#     K_on_RN = params[6]
+#     K_on_RC = params[7]
+#     K_off_TN = params[8]
+#     K_off_TC = params[9]
+#     K_off_RN = params[10]
+#     K_off_RC = params[11]
+#
+#     f = np.array([[-K_off_CaDMn, Ca*K_on_CaDMn, DMn*K_on_CaDMn, 0, 0, 0, 0, 0, 0, 0, 0],
+#     [K_off_CaDMn, -Ca*K_on_CaDMn, -DMn*K_on_CaDMn, 0, 0, 0, 0, 0, 0, 0, 0],
+#     [K_off_CaDMn, -Ca*K_on_CaDMn, -CaCtCr*K_on_RC - CaNtNr*K_on_RN - 2*CtCt*K_on_TC - DMn*K_on_CaDMn - K_on_D*OGB5N - 2*K_on_TN*NtNt, -Ca*K_on_D, K_off_D, -2*Ca*K_on_TN, -2*Ca*K_on_TC, -Ca*K_on_RN + K_off_TN, -Ca*K_on_RC + K_off_TC, 2*K_off_RN, 2*K_off_RC],
+#     [0, 0, -K_on_D*OGB5N, -Ca*K_on_D, K_off_D, 0, 0, 0, 0, 0, 0],
+#     [0, 0, K_on_D*OGB5N, Ca*K_on_D, -K_off_D, 0, 0, 0, 0, 0, 0],
+#     [0, 0, -2*K_on_TN*NtNt, 0, 0, -2*Ca*K_on_TN, 0, K_off_TN, 0, 0, 0],
+#     [0, 0, -2*CtCt*K_on_TC, 0, 0, 0, -2*Ca*K_on_TC, 0, K_off_TC, 0, 0],
+#     [0, 0, -CaNtNr*K_on_RN + 2*K_on_TN*NtNt, 0, 0, 2*Ca*K_on_TN, 0, -Ca*K_on_RN - K_off_TN, 0, 2*K_off_RN, 0],
+#     [0, 0, -CaCtCr*K_on_RC + 2*CtCt*K_on_TC, 0, 0, 0, 2*Ca*K_on_TC, 0, -Ca*K_on_RC - K_off_TC, 0, 2*K_off_RC],
+#     [0, 0, CaNtNr*K_on_RN, 0, 0, 0, 0, Ca*K_on_RN, 0, -2*K_off_RN, 0],
+#     [0, 0, CaCtCr*K_on_RC, 0, 0, 0, 0, 0, Ca*K_on_RC, 0, -2*K_off_RC]])
+#
+#
+#
+#
+#     return f
+
+## Compute sensitivity equations@njit
 ## Uncomment for hessian
 ## f_preflash_s <- sensitivitiesSymb(f_preflash) #FIND OUT HOW TO DO THIS IN PYTHON
 ## Generate ODE function
@@ -55,7 +89,6 @@ def f_preflash(y,t,params):
 ## func_preflash_s <- funC(c(f_preflash, f_preflash_s), nGridpoints=0)
 
 def get_preflash_ss(theta, phi=get_exp(0)['par'], sensitivities=False):
-
     ## Paramters
     parms = pd.concat([phi["K_off_CaDMn"]*1000,
              phi["K_on_CaDMn"]*1000,
@@ -106,7 +139,9 @@ def get_preflash_ss(theta, phi=get_exp(0)['par'], sensitivities=False):
     if sensitivities:
         out = odeint(f_preflash_s, y, times)
     else:
+        #jac = lambda y, t: f_preflash_jac(y,t,parms.to_numpy())
         out = odeint(f_preflash, y, times, args = (parms.to_numpy(),))
+
 
     if ((np.isclose(out[-1,2], Ca)).all == True):
         print("Desired level of calcium", Ca, "not equal to actual level", out[-1,2])

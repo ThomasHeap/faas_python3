@@ -1,9 +1,10 @@
 from preFLASH import *
-from numba import njit, jit
+#from numba import njit, jit
 from scipy.integrate import odeint
+#import time
 
 ## Equations
-@njit
+#@njit(parallel=True)
 def f_postflash(y,t,params):
     CaDMn_s, CaDMn_f, DMn_s, DMn_f, CaPP, PP, Ca, OGB5N, CaOGB5N, NtNt, CtCt, CaNtNr, CaCtCr, CaNrCaNr, CaCrCaCr = y
 
@@ -24,7 +25,7 @@ def f_postflash(y,t,params):
     K_off_RN = params[13]
     K_off_RC = params[14]
 
-    f = np.array([
+    f = np.asarray([
       -K_off_CaDMn*CaDMn_s + K_on_CaDMn*DMn_s*Ca - CaDMn_s*K_s,                                     #CaDMn_s
       -K_off_CaDMn*CaDMn_f + K_on_CaDMn*DMn_f*Ca -  CaDMn_f*K_f,                                    #CaDMn_f
       K_off_CaDMn*CaDMn_s - K_on_CaDMn*DMn_s*Ca - DMn_s*K_s,                                        #DMn_s
@@ -49,7 +50,46 @@ def f_postflash(y,t,params):
 
     return f
 
-
+# ## Equations
+# @jit(parallel=True)
+# def f_postflash_jac(y,t,params):
+#     CaDMn_s, CaDMn_f, DMn_s, DMn_f, CaPP, PP, Ca, OGB5N, CaOGB5N, NtNt, CtCt, CaNtNr, CaCtCr, CaNrCaNr, CaCrCaCr = y
+#
+#     #K_off_CaDMn, K_on_CaDMn, K_off_D, K_on_D, K_off_CaPP, K_f, K_s, K_on_TN, K_on_TC, K_on_RN, K_on_RC, K_off_TN, K_off_TC, K_off_RN, K_off_RC = params
+#     K_off_CaDMn = params[0]
+#     K_on_CaDMn = params[1]
+#     K_off_D = params[2]
+#     K_on_D = params[3]
+#     K_off_CaPP = params[4]
+#     K_f = params[5]
+#     K_s = params[6]
+#     K_on_TN = params[7]
+#     K_on_TC = params[8]
+#     K_on_RN = params[9]
+#     K_on_RC = params[10]
+#     K_off_TN = params[11]
+#     K_off_TC = params[12]
+#     K_off_RN = params[13]
+#     K_off_RC = params[14]
+#
+#     f = np.array([[-K_off_CaDMn - K_s, 0, Ca*K_on_CaDMn, 0, 0, 0, DMn_s*K_on_CaDMn, 0, 0, 0, 0, 0, 0, 0, 0],
+#     [0, -K_f - K_off_CaDMn, 0, Ca*K_on_CaDMn, 0, 0, DMn_f*K_on_CaDMn, 0, 0, 0, 0, 0, 0, 0, 0],
+#     [K_off_CaDMn, 0, -Ca*K_on_CaDMn - K_s, 0, 0, 0, -DMn_s*K_on_CaDMn, 0, 0, 0, 0, 0, 0, 0, 0],
+#     [0, K_off_CaDMn, 0, -Ca*K_on_CaDMn - K_f, 0, 0, -DMn_f*K_on_CaDMn, 0, 0, 0, 0, 0, 0, 0, 0],
+#     [K_s, K_f, 0, 0, -K_off_CaPP, Ca*K_on_CaDMn, K_on_CaDMn*PP, 0, 0, 0, 0, 0, 0, 0, 0],
+#     [K_s, K_f, 2*K_s, 2*K_f, K_off_CaPP, -Ca*K_on_CaDMn, -K_on_CaDMn*PP, 0, 0, 0, 0, 0, 0, 0, 0],
+#     [K_off_CaDMn, K_off_CaDMn, -Ca*K_on_CaDMn, -Ca*K_on_CaDMn, K_off_CaPP, -Ca*K_on_CaDMn, -CaCtCr*K_on_RC - CaNtNr*K_on_RN - 2*CtCt*K_on_TC - DMn_f*K_on_CaDMn - DMn_s*K_on_CaDMn - K_on_CaDMn*PP - K_on_D*OGB5N - 2*K_on_TN*NtNt, -Ca*K_on_D, K_off_D, -2*Ca*K_on_TN, -2*Ca*K_on_TC, -Ca*K_on_RN + K_off_TN, -Ca*K_on_RC + K_off_TC, 2*K_off_RN, 2*K_off_RC],
+#     [0, 0, 0, 0, 0, 0, -K_on_D*OGB5N, -Ca*K_on_D, K_off_D, 0, 0, 0, 0, 0, 0],
+#     [0, 0, 0, 0, 0, 0, K_on_D*OGB5N, Ca*K_on_D, -K_off_D, 0, 0, 0, 0, 0, 0],
+#     [0, 0, 0, 0, 0, 0, -2*K_on_TN*NtNt, 0, 0, -2*Ca*K_on_TN, 0, K_off_TN, 0, 0, 0],
+#     [0, 0, 0, 0, 0, 0, -2*CtCt*K_on_TC, 0, 0, 0, -2*Ca*K_on_TC, 0, K_off_TC, 0, 0],
+#     [0, 0, 0, 0, 0, 0, -CaNtNr*K_on_RN + 2*K_on_TN*NtNt, 0, 0, 2*Ca*K_on_TN, 0, -Ca*K_on_RN - K_off_TN, 0, 2*K_off_RN, 0],
+#     [0, 0, 0, 0, 0, 0, -CaCtCr*K_on_RC + 2*CtCt*K_on_TC, 0, 0, 0, 2*Ca*K_on_TC, 0, -Ca*K_on_RC - K_off_TC, 0, 2*K_off_RC],
+#     [0, 0, 0, 0, 0, 0, CaNtNr*K_on_RN, 0, 0, 0, 0, Ca*K_on_RN, 0, -2*K_off_RN, 0],
+#     [0, 0, 0, 0, 0, 0, CaCtCr*K_on_RC, 0, 0, 0, 0, 0, Ca*K_on_RC, 0, -2*K_off_RC]])
+#
+#
+#     return f
 ## Compute sensitivity equations
 ## Uncomment for hessian
 #f_s <- sensitivitiesSymb(f)
@@ -102,7 +142,9 @@ def postflash(theta=0, phi=get_exp(0)['par'], epsilon=0, time_points=0, hessian=
         ## Not yet
         pass
     else:
-        post_out = odeint(f_postflash, y, times, args = (parms.to_numpy(),), atol=1e-6, rtol=1e-6)
+        #jac = lambda y, t: f_postflash_jac(y,t,parms.to_numpy())
+        post_out = odeint(f_postflash, y, times, args = (parms.to_numpy(),))
+
 
     ## Value of F_max/F_min
     F_ratio = phi['Ratio_D']

@@ -3,6 +3,7 @@ from multiprocessing import get_context, Pool
 #set_start_method('forkserver')
 from functools import partial
 import numpy as np
+import time
 
 
 ## Mapping of batc ids onto experiments
@@ -65,7 +66,12 @@ def get_fratio_model(theta, ids=batch_tab.loc[batch_tab.batch_id.isin(batch_ids)
 
 #def plot_fratio(fratio, add=False):
 ## Not needed
-# if __name__ == '__main__':
-#     th = get_theta0()
-#     k = get_fratio_model(th)
-#     print(len(k))
+if __name__ == '__main__':
+    start = time.time()
+    th = get_theta0()
+
+
+    k = get_fratio_model(th)
+    end = time.time()
+    print(end - start)
+    print(len(k))
