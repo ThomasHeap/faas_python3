@@ -1,4 +1,5 @@
 from postFLASH import *
+from CaMCB import *
 from multiprocessing import get_context, Pool
 #set_start_method('forkserver')
 from functools import partial
@@ -63,6 +64,14 @@ def get_fratio_model(theta, ids=batch_tab.loc[batch_tab.batch_id.isin(batch_ids)
         pool.close()
         pool.join()
         return out
+
+## iterate through all batch_ids
+def get_camcb_model(theta):
+    ## run script that computes post-flash simulation, the F-ratio and the sensitivity based Hessian
+    theta = log10Kd_to_K(theta)
+    out = camcb(theta=theta)
+
+    return out
 
 #def plot_fratio(fratio, add=False):
 ## Not needed

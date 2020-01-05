@@ -1,49 +1,77 @@
-## Full CaM-CB binding system
-
 from main import *
+#from numba import njit, jit
 from scipy.integrate import odeint
+#import time
 
-## preflash ODEs
-def f_camcb(y,t,params):
+## Equations
+#@njit(parallel=True)
+def f_postflash(y,t,params):
     Ca, NtNt, CtCt, CaNtNr, CaCtCr, CaNrCaNr, CaCrCaCr, CB, CaCB = y
 
-    K_on_TN, K_on_TC, K_on_RN, K_on_RC, K_off_TN, K_off_TC, K_off_RN,  K_off_RC, K_on_CB, K_off_CB = params
+    ##K_on_TN, K_on_TC, K_on_RN, K_on_RC, K_off_TN, K_off_TC, K_off_RN, K_off_RC = params
+    K_on_TN = params[0]
+    K_on_TC = params[1]
+    K_on_RN = params[2]
+    K_on_RC = params[3]
+    K_off_TN = params[4]
+    K_off_TC = params[5]
+    K_off_RN = params[6]
+    K_off_RC = params[7]
+    K_on_CB = params[10]
+    K_off_CB = params[11]
 
-    f = [Ca=    -2*K_on_TN*NtNt*Ca   +   K_off_TN*CaNtNr
-                -K_on_RN*CaNtNr*Ca   + 2*K_off_RN*CaNrCaNr
-                -2*K_on_TC*CtCt*Ca   +   K_off_TC*CaCtCr
-                -K_on_RC*CaCtCr*Ca   + 2*K_off_RC*CaCrCaCr
-                -K_on_CB*CB*Ca       +   K_off_CB*CaCB,
-        NtNt=   -2*K_on_TN*NtNt*Ca   +   K_off_TN*CaNtNr,
-        CtCt=   -2*K_on_TC*CtCt*Ca   +   K_off_TC*CaCtCr,
-        CaNtNr=  2*K_on_TN*NtNt*Ca   -   K_off_TN*CaNtNr
-                -K_on_RN*CaNtNr*Ca   + 2*K_off_RN*CaNrCaNr,
-        CaCtCr=  2*K_on_TC*CtCt*Ca   -   K_off_TC*CaCtCr
-                -  K_on_RC*CaCtCr*Ca + 2*K_off_RC*CaCrCaCr,
-        CaNrCaNr=  K_on_RN*CaNtNr*Ca - 2*K_off_RN*CaNrCaNr,
-        CaCrCaCr=  K_on_RC*CaCtCr*Ca - 2*K_off_RC*CaCrCaCr,
-        CB=       -K_on_CB*CB*Ca     +   K_off_CB*CaCB,
-        CaCB=      K_on_CB*CB*Ca     -   K_off_CB*CaCB
-        ]
+    f = np.asarray([
+            -2*K_on_TN*NtNt*Ca   +   K_off_TN*CaNtNr
+             -K_on_RN*CaNtNr*Ca + 2*K_off_RN*CaNrCaNr
+           -2*K_on_TC*CtCt*Ca   +   K_off_TC*CaCtCr
+             -K_on_RC*CaCtCr*Ca + 2*K_off_RC*CaCrCaCr
+             -K_on_CB*CB*Ca     +   K_off_CB*CaCB,
+             -2*K_on_TN*NtNt*Ca   +   K_off_TN*CaNtNr,
+             -2*K_on_TC*CtCt*Ca   +   K_off_TC*CaCtCr,
+             2*K_on_TN*NtNt*Ca   -   K_off_TN*CaNtNr
+           -  K_on_RN*CaNtNr*Ca + 2*K_off_RN*CaNrCaNr,
+           2*K_on_TC*CtCt*Ca   -   K_off_TC*CaCtCr
+           -  K_on_RC*CaCtCr*Ca + 2*K_off_RC*CaCrCaCr,
+           K_on_RN*CaNtNr*Ca - 2*K_off_RN*CaNrCaNr,
+           K_on_RC*CaCtCr*Ca - 2*K_off_RC*CaCrCaCr,
+           -K_on_CB*CB*Ca     +   K_off_CB*CaCB,
+           K_on_CB*CB*Ca     -   K_off_CB*CaCB
+    ])
 
     return f
 
-def get_camcb_model(theta=K_to_log10Kd([K_on_TN=7.7e+08,
-                                                 K_on_TC=8.4e+7,
-                                                 K_on_RN=3.2e+10,
-                                                 K_on_RC=2.5e+7,
-                                                 K_off_TN=1.6e+5,
-                                                 K_off_TC=2.6e+3,
-                                                 K_off_RN=2.2e+4,
-                                                 K_off_RC=6.5]),
-                    yini=[i*1e-6 for i in [Ca=50,
-                           NtNt=100, CtCt=100, CaNtNr=0, CaCtCr=0, CaNrCaNr=0, CaCrCaCr=0,
-                           =120, CaCB=0]])
 
-    K_all = [log10Kd_to_K(theta),
-             K_on_CB=7.5e+7,
-             K_off_CB=29.5]
+def camcb(theta=0):
+    ## Experimental - try to kill runaway computations after 1s - whether
+    ## this works depends on if the cOde code checks for interrupts
+    #setTimeLimit(cpu=5)
+
+    ## all rate parameters
+    parms = pd.concat([theta, pd.Series([7.5e7, 29.5])])
+
+    parms.index = list(theta.index) + ['K_on_CB', 'K_off_CB']
+
 
     times = np.arange(0,0.01,0.0001)
-    out = odeint(f_camcb, y, times, args = (parms,))
-    return out
+    #times = np.arange(0,37, 0.01)
+
+
+    y = [50*1E-6,
+        100*1E-6,
+        100*1E-6,
+        0,
+        0,
+        0,
+        0,
+        120*1E-6,
+        0]
+
+
+    if (hessian):
+        ## Not yet
+        pass
+    else:
+        #jac = lambda y, t: f_postflash_jac(y,t,parms.to_numpy())
+        out = odeint(f_postflash, y, times, args = (parms.to_numpy(),))
+
+    return(out)
