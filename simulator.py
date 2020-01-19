@@ -18,16 +18,16 @@ class faas_Model():
 
         # Covariance matrix
         noise = 0.1
-        self.C = np.diag([noise] * 94 * 3)
-        self.Cinv = np.diag([1/noise] * 94 * 3)
-        self.L = np.diag([1/(noise ** 0.5)] * 94 * 3)
+        self.C = np.diag([noise] * 94 * 6)
+        self.Cinv = np.diag([1/noise] * 94 * 6)
+        self.L = np.diag([1/(noise ** 0.5)] * 94 * 6)
 
         # Derivative of the covariance matrix
         self.n_sn = len(self.C)
         #self.dCdt = np.zeros((self.npar, self.n_sn, self.n_sn))
 
         # N data points
-        self.ndata = 3*94
+        self.ndata = 6*94
 
 
         self.time = np.genfromtxt('data/time_points.csv', delimiter=',')
@@ -82,9 +82,21 @@ class faas_Model():
             #sd = np.std(i[-10:])
             #time to final
             #time_final = np.argmax(np.logical_and((i[time_peak:] >= final - sd),(i[time_peak:] <= final + sd)) == True) + time_peak
-            #diff_peak_final = final - peak
-            comp_d.append([final, peak, time_peak])# diff_peak_final])
-        return np.asarray(comp_d).flatten()
+            diff_peak_final = final - peak
+            first = np.mean(i[:5])
+            diff_peak_first = first - peak
+            diff_first_final = first - final
+            mid = i[len(i)//2]
+            diff_first_mid = first - mid
+            diff_final_mid = final - mid
+            comp_d.append([time_peak, diff_peak_final, diff_peak_first, diff_first_final, diff_first_mid, diff_final_mid])
+
+
+        out = np.asarray(comp_d).flatten()
+        if np.isnan(np.sum(out)):
+            return np.asarray([0]*6*len(d))
+
+        return out
     compressor_args=None
 
     def simulation(self, theta, seed):

@@ -55,7 +55,6 @@ def camcb(theta=0):
     times = np.arange(0,0.01,0.0001)
     #times = np.arange(0,37, 0.01)
 
-
     y = [50*1E-6,
         100*1E-6,
         100*1E-6,
@@ -67,11 +66,6 @@ def camcb(theta=0):
         0]
 
 
-    if (hessian):
-        ## Not yet
-        pass
-    else:
-        #jac = lambda y, t: f_postflash_jac(y,t,parms.to_numpy())
-        out = odeint(f_postflash, y, times, args = (parms.to_numpy(),))
+    out = odeint(f_postflash, y, times, args = (parms.to_numpy(),))
 
     return(out)
