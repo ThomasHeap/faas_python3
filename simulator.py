@@ -97,7 +97,7 @@ class faas_Model():
             return np.asarray([0]*6*len(d))
 
         return out
-    compressor_args=None
+
 
     def simulation(self, theta, seed):
 
