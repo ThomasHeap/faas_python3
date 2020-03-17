@@ -4,10 +4,6 @@ Faas model for calmodulin translated from R into python3. Currently known to wor
 
 Based on code written by David C. Sterratt and Judy Borowski.
 
-# Issues:
-1. nan values for training and val loss, why does this happen?
-2. memory leak somewhere?
-
 # Requirements
 Pathos
 Numba
