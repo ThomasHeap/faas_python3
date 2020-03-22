@@ -121,7 +121,7 @@ if __name__ == "__main__":
     np.save('F.npy', Score.F)
     np.save('dmudt.npy', Score.dmudt)
     #np.save('dCdt.npy' , Score.dCdt)
-
+    print('Saved!')
     #from delfi.summarystats.Score_Sum_Stats import Score_MLE_Projected
 
     #mu = np.load('mu.npy')
@@ -207,6 +207,7 @@ if __name__ == "__main__":
                     density=density, verbose=True)
 
     # train
+    print('Training!')
     log, _, posterior = res.run(
                         n_train=n_train,
                         n_rounds=n_rounds,
@@ -217,6 +218,7 @@ if __name__ == "__main__":
                         val_frac=val_frac,
                         verbose=True,)
 
+    print('Sampling!')
     posterior_samples = posterior[0].gen(10000)
     np.save('posterior_samples.npy', posterior_samples)
 
