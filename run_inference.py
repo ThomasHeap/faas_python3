@@ -99,44 +99,44 @@ if __name__ == "__main__":
 
     ## Summary Statistics
 
-    from delfi.summarystats.Score_Sum_Stats import Score_MLE_Projected
-    sim = Faas(simulator_args=simulator_args)
-    ndata = len(sim.gen_single(theta_f)['data'].flatten())
-    nuisance_indices = np.arange(10,104)
-    Score = Score_MLE_Projected(ndata = ndata, theta_fiducial=theta_f + [0.1]*94, nuisances=nuisance_indices, seed=0, n_summary=10)
-    Score.compute_mean_covariance(sim.gen_single, 50, simulator_args=simulator_args)
-    Score.compute_derivatives(sim.gen_single, 50, [0.01]*10 + [0.5]*94, simulator_args=simulator_args)
-    print('mu shape: ')
-    print(Score.mu.shape)
-    print('Cinv shape: ')
-    print(Score.Cinv.shape)
-    print('dmudt shape: ')
-    print(Score.dmudt.shape)
-    Score.compute_fisher()
-
-
-
-    np.save('mu.npy', Score.mu)
-    np.save('Cinv.npy', Score.Cinv)
-    np.save('F.npy', Score.F)
-    np.save('dmudt.npy', Score.dmudt)
-    #np.save('dCdt.npy' , Score.dCdt)
-    print('Saved!')
     #from delfi.summarystats.Score_Sum_Stats import Score_MLE_Projected
-
-    #mu = np.load('mu.npy')
-    #Cinv = np.load('Cinv.npy', allow_pickle=True)
-    #Cinv = np.diag([10]*8178)
-    #F = np.load('F.npy', allow_pickle=True)
-    #dmudt = np.load('dmudt.npy', allow_pickle=True)
-    #dCdt = np.load('dCdt.npy', allow_pickle=True)
-
     #sim = Faas(simulator_args=simulator_args)
     #ndata = len(sim.gen_single(theta_f)['data'].flatten())
     #nuisance_indices = np.arange(10,104)
-    #print(nuisance_indices)
-    ##print((theta_f + [0.1]*94)[np.delete(np.arange(len(theta_f + [0]*94)), nuisance_indices)])
-    #Score = Score_MLE_Projected(ndata = ndata, theta_fiducial=np.asarray(theta_f + [0.1]*94), nuisances=nuisance_indices, seed=0, mu=mu, Cinv=Cinv, dmudt=dmudt,F=F, n_summary = 10)
+    #Score = Score_MLE_Projected(ndata = ndata, theta_fiducial=theta_f + [0.1]*94, nuisances=nuisance_indices, seed=0, n_summary=10)
+    #Score.compute_mean_covariance(sim.gen_single, 50, simulator_args=simulator_args)
+    #Score.compute_derivatives(sim.gen_single, 50, [0.01]*10 + [0.5]*94, simulator_args=simulator_args)
+    #print('mu shape: ')
+    #print(Score.mu.shape)
+    #print('Cinv shape: ')
+    #print(Score.Cinv.shape)
+    #print('dmudt shape: ')
+    #print(Score.dmudt.shape)
+    #Score.compute_fisher()
+
+
+
+    #np.save('mu.npy', Score.mu)
+    #np.save('Cinv.npy', Score.Cinv)
+    #np.save('F.npy', Score.F)
+    #np.save('dmudt.npy', Score.dmudt)
+    #np.save('dCdt.npy' , Score.dCdt)
+    #print('Saved!')
+    from delfi.summarystats.Score_Sum_Stats import Score_MLE_Projected
+
+    mu = np.load('mu.npy')
+    Cinv = np.load('Cinv.npy', allow_pickle=True)
+    #Cinv = np.diag([10]*8178)
+    F = np.load('F.npy', allow_pickle=True)
+    dmudt = np.load('dmudt.npy', allow_pickle=True)
+    dCdt = np.load('dCdt.npy', allow_pickle=True)
+
+    sim = Faas(simulator_args=simulator_args)
+    ndata = len(sim.gen_single(theta_f)['data'].flatten())
+    nuisance_indices = np.arange(10,104)
+    print(nuisance_indices)
+    #print((theta_f + [0.1]*94)[np.delete(np.arange(len(theta_f + [0]*94)), nuisance_indices)])
+    Score = Score_MLE_Projected(ndata = ndata, theta_fiducial=np.asarray(theta_f + [0.1]*94), nuisances=nuisance_indices, seed=0, mu=mu, Cinv=Cinv, dmudt=dmudt,F=F, n_summary = 10)
     ##Score.compute_mean_covariance(sim.gen_single, 10, simulator_args=simulator_args)
     ##Score.compute_derivatives(sim.gen_single, 10, [0.01]*10 + [0.5]*94, simulator_args=simulator_args)
     #print(Score.mu.shape)
@@ -164,7 +164,7 @@ if __name__ == "__main__":
     # observed data: simulation given known parameters
     obs = m.gen_single(true_params)
 
-    obs_stats = s.calc([data])
+    obs_stats = s.calc([obs])
 
     ##Inference
 
