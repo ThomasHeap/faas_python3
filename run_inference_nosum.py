@@ -95,56 +95,59 @@ if __name__ == "__main__":
                 states = np.random.randn(94,259)
                     #return d.flatten()
 
-            return {'data': states[:,::3], 'time': self.time}
+            return {'data': states, 'time': self.time}
 
     ## Summary Statistics
 
-    #from delfi.summarystats.Score_Sum_Stats import Score_MLE_Projected
-    #sim = Faas(simulator_args=simulator_args)
-    #ndata = len(sim.gen_single(theta_f)['data'].flatten())
-    #nuisance_indices = np.arange(10,104)
-    #Score = Score_MLE_Projected(ndata = ndata, theta_fiducial=theta_f + [0.1]*94, nuisances=nuisance_indices, seed=0, n_summary=10)
-    #Score.compute_mean_covariance(sim.gen_single, 50, simulator_args=simulator_args)
-    #Score.compute_derivatives(sim.gen_single, 50, [0.01]*10 + [0.5]*94, simulator_args=simulator_args)
-    #print('mu shape: ')
-    #print(Score.mu.shape)
-    #print('Cinv shape: ')
-    #print(Score.Cinv.shape)
-    #print('dmudt shape: ')
-    #print(Score.dmudt.shape)
-    #Score.compute_fisher()
+class FaasStats(BaseSummaryStats):
+    """Moment based SummaryStats class for the faas model
 
+    Calculates summary statistics
+    """
+    def __init__(self, seed=None):
+        """See SummaryStats.py for docstring"""
+        super(FaasStats, self).__init__(seed=seed)
+        self.time = np.genfromtxt('data/time_points.csv', delimiter=',')
+    
+    def compressor(self, d, t):
+            comp_d = []
+            
+            out = d.flatten()
+            if np.isnan(out).any() or np.isinf(out).any():
+                return np.random.randn(out.shape[0])**2
+                #return d.flatten()
 
+            #return out + np.random.rand(6*len(d))
+            return out
+    
+    def calc(self, repetition_list):
+        """Calculate summary statistics
 
-    #np.save('mu.npy', Score.mu)
-    #np.save('Cinv.npy', Score.Cinv)
-    #np.save('F.npy', Score.F)
-    #np.save('dmudt.npy', Score.dmudt)
-    #np.save('dCdt.npy' , Score.dCdt)
-    #print('Saved!')
-    from delfi.summarystats.Score_Sum_Stats import Score_MLE_Projected
+        Parameters
+        ----------
+        repetition_list : list of dictionaries, one per repetition
+            data list, returned by `gen` method of Simulator instance
 
-    mu = np.load('mu.npy')
-    Cinv = np.load('Cinv.npy', allow_pickle=True)
-    #Cinv = np.diag([10]*8178)
-    F = np.load('F.npy', allow_pickle=True)
-    dmudt = np.load('dmudt.npy', allow_pickle=True)
-    #dCdt = np.load('dCdt.npy', allow_pickle=True)
+        Returns
+        -------
+        np.array, 2d with n_reps x n_summary
+        """
+        stats = []
+        for r in range(len(repetition_list)):
+            x = repetition_list[r]
 
-    sim = Faas(simulator_args=simulator_args)
-    ndata = len(sim.gen_single(theta_f)['data'].flatten())
-    nuisance_indices = np.arange(10,104)
-    print(nuisance_indices)
-    #print((theta_f + [0.1]*94)[np.delete(np.arange(len(theta_f + [0]*94)), nuisance_indices)])
-    Score = Score_MLE_Projected(ndata = ndata, theta_fiducial=np.asarray(theta_f + [0.1]*94), nuisances=nuisance_indices, seed=0, mu=mu, Cinv=Cinv, dmudt=dmudt,F=F, n_summary = 10)
-    ##Score.compute_mean_covariance(sim.gen_single, 10, simulator_args=simulator_args)
-    ##Score.compute_derivatives(sim.gen_single, 10, [0.01]*10 + [0.5]*94, simulator_args=simulator_args)
-    #print(Score.mu.shape)
-    #print(Score.Cinv.shape)
-    #print(Score.dmudt.shape)
-    #print(Score.F.shape) 
-    #Score.compute_fisher()
+            N = x['data']
+            t = self.time
 
+            # concatenation of summary statistics
+            sum_stats_vec = self.compressor(N, t)
+            #sum_stats_vec = sum_stats_vec[0:self.n_summary]
+
+            stats.append(sum_stats_vec)
+
+        return np.asarray(stats)
+    
+    
     ##Generator
     import delfi.generator as dg
     
@@ -155,7 +158,7 @@ if __name__ == "__main__":
     #for i in range(n_processes):
     #    m.append(Faas(seed=seeds_m[i]))
     m=Faas(seed=1)
-    s = Score
+    s = FaasStats(seed=1)
     g = dg.Default(model=m, prior=prior, summary=s)
 
 
