@@ -129,7 +129,7 @@ if __name__ == "__main__":
     #Cinv = np.diag([10]*8178)
     F = np.load('F.npy', allow_pickle=True)
     dmudt = np.load('dmudt.npy', allow_pickle=True)
-    dCdt = np.load('dCdt.npy', allow_pickle=True)
+    #dCdt = np.load('dCdt.npy', allow_pickle=True)
 
     sim = Faas(simulator_args=simulator_args)
     ndata = len(sim.gen_single(theta_f)['data'].flatten())
@@ -147,8 +147,14 @@ if __name__ == "__main__":
 
     ##Generator
     import delfi.generator as dg
+    
+    #n_processes = 16
+    #seeds_m = np.arange(1,n_processes+1,1)
+    #m = []
 
-    m = Faas(seed=0)
+    #for i in range(n_processes):
+    #    m.append(Faas(seed=seeds_m[i]))
+    m=Faas(seed=1)
     s = Score
     g = dg.Default(model=m, prior=prior, summary=s)
 
@@ -175,7 +181,7 @@ if __name__ == "__main__":
 
     # training schedule
     n_train = 500
-    n_rounds = 5
+    n_rounds = 50
 
     # fitting setup
     minibatch = 100
@@ -183,14 +189,14 @@ if __name__ == "__main__":
     val_frac = 0.05
 
     # network setup
-    n_hiddens = [50]*5
+    n_hiddens = [100]*10
 
     # convenience
     prior_norm = True
 
     # MAF parameters
     density = 'maf'
-    n_mades = 5       # number of MADES
+    n_mades = 15       # number of MADES
 
 
 
