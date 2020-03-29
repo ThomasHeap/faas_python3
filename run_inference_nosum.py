@@ -98,54 +98,54 @@ if __name__ == "__main__":
             return {'data': states, 'time': self.time}
 
     ## Summary Statistics
+    from delfi.summarystats.BaseSummaryStats import BaseSummaryStats
+    class FaasStats(BaseSummaryStats):
+        """Moment based SummaryStats class for the faas model
 
-class FaasStats(BaseSummaryStats):
-    """Moment based SummaryStats class for the faas model
-
-    Calculates summary statistics
-    """
-    def __init__(self, seed=None):
-        """See SummaryStats.py for docstring"""
-        super(FaasStats, self).__init__(seed=seed)
-        self.time = np.genfromtxt('data/time_points.csv', delimiter=',')
-    
-    def compressor(self, d, t):
-            comp_d = []
-            
-            out = d.flatten()
-            if np.isnan(out).any() or np.isinf(out).any():
-                return np.random.randn(out.shape[0])**2
-                #return d.flatten()
-
-            #return out + np.random.rand(6*len(d))
-            return out
-    
-    def calc(self, repetition_list):
-        """Calculate summary statistics
-
-        Parameters
-        ----------
-        repetition_list : list of dictionaries, one per repetition
-            data list, returned by `gen` method of Simulator instance
-
-        Returns
-        -------
-        np.array, 2d with n_reps x n_summary
+        Calculates summary statistics
         """
-        stats = []
-        for r in range(len(repetition_list)):
-            x = repetition_list[r]
+        def __init__(self, seed=None):
+            """See SummaryStats.py for docstring"""
+            super(FaasStats, self).__init__(seed=seed)
+            self.time = np.genfromtxt('data/time_points.csv', delimiter=',')
 
-            N = x['data']
-            t = self.time
+        def compressor(self, d, t):
+                comp_d = []
 
-            # concatenation of summary statistics
-            sum_stats_vec = self.compressor(N, t)
-            #sum_stats_vec = sum_stats_vec[0:self.n_summary]
+                out = d.flatten()
+                if np.isnan(out).any() or np.isinf(out).any():
+                    return np.random.randn(out.shape[0])**2
+                    #return d.flatten()
 
-            stats.append(sum_stats_vec)
+                #return out + np.random.rand(6*len(d))
+                return out
 
-        return np.asarray(stats)
+        def calc(self, repetition_list):
+            """Calculate summary statistics
+
+            Parameters
+            ----------
+            repetition_list : list of dictionaries, one per repetition
+                data list, returned by `gen` method of Simulator instance
+
+            Returns
+            -------
+            np.array, 2d with n_reps x n_summary
+            """
+            stats = []
+            for r in range(len(repetition_list)):
+                x = repetition_list[r]
+
+                N = x['data']
+                t = self.time
+
+                # concatenation of summary statistics
+                sum_stats_vec = self.compressor(N, t)
+                #sum_stats_vec = sum_stats_vec[0:self.n_summary]
+
+                stats.append(sum_stats_vec)
+
+            return np.asarray(stats)
     
     
     ##Generator
