@@ -183,7 +183,7 @@ class FaasStats(BaseSummaryStats):
     pilot_samples = 20
 
     # training schedule
-    n_train = 500
+    n_train = 1000
     n_rounds = 50
 
     # fitting setup
@@ -199,7 +199,7 @@ class FaasStats(BaseSummaryStats):
 
     # MAF parameters
     density = 'maf'
-    n_mades = 15       # number of MADES
+    n_mades = 20       # number of MADES
 
 
 
