@@ -51,7 +51,7 @@ def func(id,thetaf):
 
 ## iterate through all batch_ids
 def get_fratio_model(theta, ids=batch_tab.loc[batch_tab.batch_id.isin(batch_ids)]['expVec']):
-    with get_context("forkserver").Pool() as pool:
+    with Pool() as pool:
         ## determine the experiment IDs and the batch name
         ids = ids.reset_index(drop=True)
         #ids = [0]
