@@ -177,11 +177,11 @@ if __name__ == "__main__":
 
     seed_inf = 20
 
-    pilot_samples = 20
+    pilot_samples = 200
 
     # training schedule
     n_train = 500
-    n_rounds = 50
+    n_rounds = 15
 
     # fitting setup
     minibatch = 100
@@ -226,5 +226,5 @@ if __name__ == "__main__":
 
     print('Sampling!')
     posterior_samples = posterior[0].gen(10000)
-    np.save('posterior_samples.npy', posterior_samples)
+    np.save('posterior_samples_summaries.npy', posterior_samples)
 
