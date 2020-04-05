@@ -1,6 +1,6 @@
 from main import *
 #from numba import njit, jit
-from scipy.integrate import odeint, ode
+from scipy.integrate import odeint
 #import time
 
 ## one specific experiment - determine here for main script
@@ -10,24 +10,21 @@ from scipy.integrate import odeint, ode
 
 ## preflash ODEs
 #@njit(parallel=True)
-def f_preflash(t,y,params):
+def f_preflash(y,t,params):
     CaDMn, DMn, Ca, OGB5N, CaOGB5N, NtNt, CtCt, CaNtNr, CaCtCr, CaNrCaNr, CaCrCaCr = y
 
-
-
-    K_off_CaDMn, K_on_CaDMn, K_off_D, K_on_D, K_on_TN, K_on_TC, K_on_RN, K_on_RC, K_off_TN, K_off_TC, K_off_RN, K_off_RC = params[:12]
-    # K_off_CaDMn = params[0]
-    # K_on_CaDMn = params[1]
-    # K_off_D = params[2]
-    # K_on_D = params[3]
-    # K_on_TN = params[4]
-    # K_on_TC = params[5]
-    # K_on_RN = params[6]
-    # K_on_RC = params[7]
-    # K_off_TN = params[8]
-    # K_off_TC = params[9]
-    # K_off_RN = params[10]
-    # K_off_RC = params[11]
+    K_off_CaDMn = params[0]
+    K_on_CaDMn = params[1]
+    K_off_D = params[2]
+    K_on_D = params[3]
+    K_on_TN = params[4]
+    K_on_TC = params[5]
+    K_on_RN = params[6]
+    K_on_RC = params[7]
+    K_off_TN = params[8]
+    K_off_TC = params[9]
+    K_off_RN = params[10]
+    K_off_RC = params[11]
 
     f = np.asarray([-K_off_CaDMn*CaDMn + K_on_CaDMn*DMn*Ca,       #CaDMn
           K_off_CaDMn*CaDMn - K_on_CaDMn*DMn*Ca,       #DMn
@@ -51,10 +48,21 @@ def f_preflash(t,y,params):
     return f
 
 #@jit(parallel=True)
-def f_preflash_jac(t,y,params):
+def f_preflash_jac(y,t,params):
     CaDMn, DMn, Ca, OGB5N, CaOGB5N, NtNt, CtCt, CaNtNr, CaCtCr, CaNrCaNr, CaCrCaCr = y
 
-    K_off_CaDMn, K_on_CaDMn, K_off_D, K_on_D, K_on_TN, K_on_TC, K_on_RN, K_on_RC, K_off_TN, K_off_TC, K_off_RN, K_off_RC = params[:12]
+    K_off_CaDMn = params[0]
+    K_on_CaDMn = params[1]
+    K_off_D = params[2]
+    K_on_D = params[3]
+    K_on_TN = params[4]
+    K_on_TC = params[5]
+    K_on_RN = params[6]
+    K_on_RC = params[7]
+    K_off_TN = params[8]
+    K_off_TC = params[9]
+    K_off_RN = params[10]
+    K_off_RC = params[11]
 
     f = np.array([[-K_off_CaDMn, Ca*K_on_CaDMn, DMn*K_on_CaDMn, 0, 0, 0, 0, 0, 0, 0, 0],
     [K_off_CaDMn, -Ca*K_on_CaDMn, -DMn*K_on_CaDMn, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -132,26 +140,7 @@ def get_preflash_ss(theta, phi=get_exp(0)['par'], sensitivities=False):
         out = odeint(f_preflash_s, y, times)
     else:
         #jac = lambda y, t: f_preflash_jac(y,t,parms.to_numpy())
-        #out = odeint(f_preflash, y, times, args = (parms.to_numpy(),))
-        sol = ode(f_preflash, jac=f_preflash_jac)
-        sol.set_integrator(
-            'vode', method='bdf', with_jacobian=True,
-            atol=1e-9, rtol=1e-9, min_step=1e-8
-        )
-        sol.set_initial_value(y, times[0])
-        sol.set_f_params(parms.to_numpy())
-        sol.set_jac_params(parms.to_numpy())
-
-        T = [times[0]]
-        Y = [y]
-
-        while sol.successful():
-            for i in times[1:]:
-                sol.integrate(i)
-                T.append(sol.t)
-                Y.append(sol.y)
-
-        out = np.vstack(Y)
+        out = odeint(f_preflash, y, times, args = (parms.to_numpy(),), Dfun=f_preflash_jac)
 
 
     if ((np.isclose(out[-1,2], Ca)).all == True):
