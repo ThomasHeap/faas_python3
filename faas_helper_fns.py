@@ -19,13 +19,12 @@ def simulator(th, eps=[0]*94, seed=1):
     #eps = [0] * 94
 
     if len(th) < 104:
-        th = list(th) + []
         sims = faasSimulator.forward(np.concatenate([th, eps]), seed)
-        return sims + np.random.normal(scale = 0.001, size=sims.shape)
+        return sims #+ np.random.normal(scale = 0.001, size=sims.shape)
         #mean of final ten entrie
     else:
         sims =  faasSimulator.forward(th, seed)
-        return sims + np.random.normal(scale = 0.001, size=sims.shape)
+        return sims #+ np.random.normal(scale = 0.001, size=sims.shape)
 
 
 def calc_summ(d):
@@ -83,7 +82,7 @@ def calc_summ(d):
         # peaks, _ = find_peaks(i)
         # peaks_widths = peak_widths(i, peaks)[0]
 
-        comp_d.append([peak, final])# max_slope_index,
+        comp_d.append([peak, final, time_peak, diff_peak_final])# max_slope_index,
                       #min_slope_index, mean_10, mean_30, mean_rest, diff_first_mid, diff_final_mid,
                       #diff_peak_mid, mom_2, mom_3, mom_4, mom_5,
                       #mom_diff_1, mom_diff_2, mom_diff_3, mom_diff_4, mom_diff_5])
