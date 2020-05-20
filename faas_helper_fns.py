@@ -21,11 +21,11 @@ def simulator(th, eps=[0]*94, seed=1):
     if len(th) < 104:
         th = list(th) + []
         sims = faasSimulator.forward(np.concatenate([th, eps]), seed)
-        return sims + np.random.normal(scale = 0.01, size=sims.shape)
+        return sims + np.random.normal(scale = 0.001, size=sims.shape)
         #mean of final ten entrie
     else:
         sims =  faasSimulator.forward(th, seed)
-        return sims + np.random.normal(scale = 0.01, size=sims.shape)
+        return sims + np.random.normal(scale = 0.001, size=sims.shape)
 
 
 def calc_summ(d):
