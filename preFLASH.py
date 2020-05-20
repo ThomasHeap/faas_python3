@@ -143,7 +143,7 @@ def get_preflash_ss(theta, phi=get_exp(0)['par'], sensitivities=False):
         #jac = lambda y, t: f_preflash_jac(y,t,parms.to_numpy())
         out = odeint(f_preflash, y, times, args = (parms.to_numpy(),), Dfun=f_preflash_jac)
 
-    print(out)
+    
     if ((np.isclose(out[-1,2], Ca)).all == True):
         print("Desired level of calcium", Ca, "not equal to actual level", out[-1,2])
 
