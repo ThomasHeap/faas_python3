@@ -2,9 +2,10 @@ from postFLASH import *
 from CaMCB import *
 from multiprocessing import get_context, Pool
 #set_start_method('forkserver')
-from functools import partial
+from itertools import repeat, starmap
 import numpy as np
 import time
+import os
 
 
 ## Mapping of batc ids onto experiments
@@ -51,19 +52,19 @@ def func(id,thetaf):
 
 ## iterate through all batch_ids
 def get_fratio_model(theta, ids=batch_tab.loc[batch_tab.batch_id.isin(batch_ids)]['expVec']):
-    with get_context("forkserver").Pool() as pool:
-        ## determine the experiment IDs and the batch name
-        ids = ids.reset_index(drop=True)
-        # ids = [0]
-        ## iterate through all experiments
-        ## run script that computes post-flash simulation, the F-ratio and the sensitivity based Hessian
-        theta = log10Kd_to_K(theta)
-        functheta = partial(func, thetaf=theta)
+    theta = log10Kd_to_K(theta)
+    #with get_context("forkserver").Pool() as pool:
+    ## determine the experiment IDs and the batch name
+    ids = ids.reset_index(drop=True)
+    # ids = [0]
+    ## iterate through all experiments
+    ## run script that computes post-flash simulation, the F-ratio and the sensitivity based Hessian
 
-        out = pool.map(functheta, ids)
-        pool.close()
-        pool.join()
-        return out
+
+    out = list(starmap(func, zip(ids, repeat(theta))))
+    #pool.close()
+    #pool.join()
+    return out
 
 ## iterate through all batch_ids
 def get_camcb_model(theta):
@@ -73,14 +74,14 @@ def get_camcb_model(theta):
 
     return out
 
-#def plot_fratio(fratio, add=False):
-## Not needed
-if __name__ == '__main__':
-    start = time.time()
-    th = get_theta0()
-
-
-    k = get_fratio_model(th)
-    end = time.time()
-    print(end - start)
-    print(len(k))
+# #def plot_fratio(fratio, add=False):
+# ## Not needed
+# if __name__ == '__main__':
+#     start = time.time()
+#     th = get_theta0()
+#
+#
+#     k = get_fratio_model(th)
+#     end = time.time()
+#     print(end - start)
+#     print(len(k))
