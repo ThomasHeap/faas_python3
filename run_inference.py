@@ -32,7 +32,7 @@ def simulation_wrapper(params):
     return summstats
 
 if __name__ == "__main__":
-    prior_max = np.array([12,  10, 12,  10, -3, -4, -4,-4] + [0.05,-0.5])
+    prior_max = np.array([12,  10, 12,  10, -3, -4, -4,-4] + [0.05,0.5])
     prior_min = np.array([4,  2, 4, 2, -10, -10, -10, -12] + [-0.05,-0.5])
     prior = utils.torchutils.BoxUniform(low=torch.as_tensor(prior_min), high=torch.as_tensor(prior_max))
 
@@ -57,7 +57,7 @@ if __name__ == "__main__":
 
 
     # Run inference.
-    num_rounds, num_simulations_per_round = 20, 2000
+    num_rounds, num_simulations_per_round = 2, 30
     posterior = infer(
         num_rounds=num_rounds, num_simulations_per_round=num_simulations_per_round, batch_size=2
     )
