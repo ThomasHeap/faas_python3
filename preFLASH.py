@@ -89,6 +89,7 @@ def f_preflash_jac(y,t,params):
 ## func_preflash_s <- funC(c(f_preflash, f_preflash_s), nGridpoints=0)
 
 def get_preflash_ss(theta, phi=get_exp(0)['par'], sensitivities=False):
+
     ## Paramters
     parms = pd.concat([phi["K_off_CaDMn"]*1000,
              phi["K_on_CaDMn"]*1000,
@@ -97,7 +98,7 @@ def get_preflash_ss(theta, phi=get_exp(0)['par'], sensitivities=False):
              theta])
 
     parms.index = ['K_off_CaDMn', 'K_on_CaDMn', 'K_off_D', 'K_on_D'] + list(theta.index)
-    #print(parms)
+
 
     ## Calculation of initial Ca concentration
     DMn0 = float(phi["DM_tot"])
@@ -130,7 +131,7 @@ def get_preflash_ss(theta, phi=get_exp(0)['par'], sensitivities=False):
          0,            #CaNrCaNr
          0]            #CaCrCaCr
 
-    #print(y)
+
 
 
     ## Run simulation for 10 seconds - equilibrium is certainly reached
@@ -142,7 +143,7 @@ def get_preflash_ss(theta, phi=get_exp(0)['par'], sensitivities=False):
         #jac = lambda y, t: f_preflash_jac(y,t,parms.to_numpy())
         out = odeint(f_preflash, y, times, args = (parms.to_numpy(),), Dfun=f_preflash_jac)
 
-
+    print(out)
     if ((np.isclose(out[-1,2], Ca)).all == True):
         print("Desired level of calcium", Ca, "not equal to actual level", out[-1,2])
 
