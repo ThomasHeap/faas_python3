@@ -49,7 +49,7 @@ if __name__ == "__main__":
         simulator=simulation_wrapper,
         x_o=observation_summary_statistics,
         prior=prior,
-        simulation_batch_size=1,
+        simulation_batch_size=10,
     )
 
 
@@ -57,7 +57,7 @@ if __name__ == "__main__":
 
 
     # Run inference.
-    num_rounds, num_simulations_per_round = 2, 30
+    num_rounds, num_simulations_per_round = 1, 100
     posterior = infer(
         num_rounds=num_rounds, num_simulations_per_round=num_simulations_per_round, batch_size=2
     )
