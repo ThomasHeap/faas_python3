@@ -43,7 +43,7 @@ if __name__ == "__main__":
     labels_params = ['KonTN', 'KonTC', 'KonRN', 'KonRC', 'KDTN', 'KDTC', 'KDRN', 'KDRC', 'malpha', 'alpha0']
 
 
-    observation_trace = run_faas_model(torch.as_tensor(true_params))
+    observation_trace = run_faas_model(torch.as_tensor([true_params]))
     observation_summary_statistics = torch.as_tensor(calc_summ(observation_trace))
     snpe_common_args = dict(
         simulator=simulation_wrapper,
