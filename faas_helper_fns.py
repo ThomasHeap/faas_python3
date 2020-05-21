@@ -13,6 +13,7 @@ from scipy.signal import find_peaks, peak_widths
 
 
 def sim(th, eps=[0]*94):
+
     if th.shape[0] < 104:
         theta = pd.Series(list(th)+list(eps))
         theta.index = ['logK_on_TN', 'logK_on_TC', 'logK_on_RN', 'logK_on_RC', 'logK_D_TN', 'logK_D_TC', 'logK_D_RN', 'logK_D_RC', 'm_alpha', 'alpha0'] + ['epsilon' + str(i) for i in np.arange(0,94)]
@@ -32,10 +33,13 @@ def sim(th, eps=[0]*94):
 
 
 def simulator(th):
+    th = th.numpy()
+    if len(th.shape) < 2:
+        th = th[np.newaxis,:]
 
     with get_context("forkserver").Pool() as pool:
-        print(th.numpy())
-        sims = pool.map(sim, th.numpy())
+
+        sims = pool.map(sim,th)
         pool.close()
         pool.join()
 
