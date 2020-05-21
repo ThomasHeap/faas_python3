@@ -13,7 +13,6 @@ from scipy.signal import find_peaks, peak_widths
 
 
 def sim(th, eps=[0]*94):
-    print(th)
     if th.shape[0] < 104:
         theta = pd.Series(list(th)+list(eps))
         theta.index = ['logK_on_TN', 'logK_on_TC', 'logK_on_RN', 'logK_on_RC', 'logK_D_TN', 'logK_D_TC', 'logK_D_RN', 'logK_D_RC', 'm_alpha', 'alpha0'] + ['epsilon' + str(i) for i in np.arange(0,94)]
@@ -120,4 +119,13 @@ def calc_summ(d):
         #return d.flatten()
 
     #return out + np.random.rand(6*len(d))
-    return [i.flatten() for i in d['data']]
+
+    for i in d['data']:
+        out = np.asarray([[np.mean(j[-10:]), np.max(j)] for j in i]).flatten()
+
+        if np.isnan(out).any() or np.isinf(out).any():
+            print('Summary Failed!')
+            comp_d.append(np.zeros(out.shape[0]))
+        else:
+            comp_d.append(out)
+    return comp_d
