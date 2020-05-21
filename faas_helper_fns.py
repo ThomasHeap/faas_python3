@@ -34,7 +34,7 @@ def sim(th, eps=[0]*94):
 def simulator(th):
 
     with get_context("forkserver").Pool() as pool:
-        print(th)
+        print(th.numpy())
         sims = pool.map(sim, th.numpy())
         pool.close()
         pool.join()
