@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from fratio import get_fratio_model
 from multiprocessing import get_context, Pool
+import torch
 
 from scipy import stats
 from scipy.signal import find_peaks, peak_widths
@@ -126,6 +127,7 @@ def calc_summ(d):
     #return out + np.random.rand(6*len(d))
 
     for i in d['data']:
+
         out = np.asarray([[np.mean(j[-10:]), np.max(j)] for j in i]).flatten()
 
         if np.isnan(out).any() or np.isinf(out).any():
@@ -133,4 +135,4 @@ def calc_summ(d):
             comp_d.append(np.zeros(out.shape[0]))
         else:
             comp_d.append(out)
-    return comp_d
+    return np.asarray(comp_d)

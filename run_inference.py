@@ -28,7 +28,7 @@ def simulation_wrapper(params):
     Takes in conductance values and then first runs the Hodgkin Huxley model and then returns the summary statistics as torch.Tensor
     """
     obs = run_faas_model(params)
-    summstats = calc_summ(d=obs)
+    summstats = np.asarray(calc_summ(d=obs))
     return summstats
 
 if __name__ == "__main__":
@@ -45,7 +45,11 @@ if __name__ == "__main__":
 
     observation_trace = run_faas_model(torch.as_tensor([true_params]))
 
-    observation_summary_statistics = torch.as_tensor(calc_summ(observation_trace))
+
+    observation_summary_statistics = torch.as_tensor(simulation_wrapper(torch.as_tensor([true_params])))
+    #print(observation_summary_statistics)
+
+
     snpe_common_args = dict(
         simulator=simulation_wrapper,
         x_o=observation_summary_statistics,
@@ -58,12 +62,12 @@ if __name__ == "__main__":
 
 
     # Run inference.
-    num_rounds, num_simulations_per_round = 1, 10
-    posterior = infer(
-        num_rounds=num_rounds, num_simulations_per_round=num_simulations_per_round, batch_size=2
-    )
-    print('Sampling!')
+    num_rounds, num_simulations_per_round = 2, 30
+    #posterior = infer(
+    #    num_rounds=num_rounds, num_simulations_per_round=num_simulations_per_round, batch_size=2
+    #)
+    #print('Sampling!')
 
 
-    samples = posterior.sample(10000)
-    np.save('samples.npy', samples)
+    #samples = posterior.sample(10000)
+    #np.save('samples.npy', samples)
