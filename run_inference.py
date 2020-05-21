@@ -15,7 +15,7 @@ from faas_helper_fns import simulator, calc_summ
 
 def run_faas_model(params):
 
-    params = np.asarray(params)
+    #params = np.asarray(params)
 
     states = simulator(th=params)
     t = np.genfromtxt('data/time_points.csv', delimiter=',')
