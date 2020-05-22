@@ -28,7 +28,7 @@ def simulation_wrapper(params):
     Takes in conductance values and then first runs the Hodgkin Huxley model and then returns the summary statistics as torch.Tensor
     """
     obs = run_faas_model(params)
-    obs['states'] = obs['states'] + np.random.normal(scale=0.001, size=obs['states'].shape)
+    obs['data'] = [(i + np.random.normal(scale=0.001, size=i.shape)) for i in obs['data']]
     summstats = np.asarray(calc_summ(d=obs))
     return summstats
 
