@@ -17,7 +17,7 @@ def run_faas_model(params):
 
     #params = np.asarray(params)
 
-    states = simulator(th=params) + np.random.normal(scale=0.001, size=states.shape)
+    states = simulator(th=params)
     t = np.genfromtxt('data/time_points.csv', delimiter=',')
 
     return {'data': states,
@@ -28,6 +28,7 @@ def simulation_wrapper(params):
     Takes in conductance values and then first runs the Hodgkin Huxley model and then returns the summary statistics as torch.Tensor
     """
     obs = run_faas_model(params)
+    obs = obs + np.random.normal(scale=0.001, size=obs.shape)
     summstats = np.asarray(calc_summ(d=obs))
     return summstats
 
