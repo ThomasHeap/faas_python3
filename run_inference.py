@@ -55,19 +55,21 @@ if __name__ == "__main__":
         x_o=observation_summary_statistics,
         prior=prior,
         simulation_batch_size=10,
+        use_combined_loss = False,
     )
 
 
-    infer = SnpeC(sample_with_mcmc=False, **snpe_common_args)
+    infer = SnpeC(sample_with_mcmc=True, **snpe_common_args)
 
 
     # Run inference.
-    num_rounds, num_simulations_per_round = 2, 30
-    #posterior = infer(
-    #    num_rounds=num_rounds, num_simulations_per_round=num_simulations_per_round, batch_size=2
-    #)
-    #print('Sampling!')
+    num_rounds, num_simulations_per_round = 1, 100
+    posterior = infer(
+        num_rounds=num_rounds, num_simulations_per_round=num_simulations_per_round, batch_size=2
+    )
+    print('Sampling!')
 
-
-    #samples = posterior.sample(10000)
-    #np.save('samples.npy', samples)
+    np.save('sims.npy', infer._x_bank)
+    np.save('thetas.npy', infer._theta_bank)
+    samples = posterior.sample(10000)
+    np.save('samples.npy', samples)

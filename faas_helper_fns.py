@@ -112,7 +112,7 @@ def calc_summ(d):
     #     #comp_d.append([time_peak, min_slope, max_slope, diff_peak_final, diff_peak_first])# max_slope_index,
     #                   #min_slope_index, mean_10, mean_30, mean_rest, diff_first_mid, diff_final_mid,
     #                   #diff_peak_mid, mom_2, mom_3, mom_4, mom_5,
-    #                   #mom_diff_1, mom_diff_2, mom_diff_3, mom_diff_4, mom_diff_5])
+    #                   #mom_diff_0, mom_diff_2, mom_diff_3, mom_diff_4, mom_diff_5])
     #                   #peaks, peaks_widths])
     #
     #
@@ -128,7 +128,7 @@ def calc_summ(d):
 
     for i in d['data']:
 
-        out = np.asarray([[np.mean(j[-10:]), np.max(j)] for j in i]).flatten()
+        out = np.asarray(i).flatten()
 
         if np.isnan(out).any() or np.isinf(out).any():
             print('Summary Failed!')
