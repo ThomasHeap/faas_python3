@@ -17,7 +17,7 @@ def run_faas_model(params):
 
     #params = np.asarray(params)
 
-    states = simulator(th=params)
+    states = simulator(th=params) + np.random.normal(scale=0.001, size=states.shape)
     t = np.genfromtxt('data/time_points.csv', delimiter=',')
 
     return {'data': states,
