@@ -16,7 +16,7 @@ from scipy.signal import find_peaks, peak_widths
 def sim(th, eps=[0]*94):
 
     if th.shape[0] < 104:
-        theta = pd.Series(list(th)+[1.050515e+01, 7.397940e+00, -3.682371e+00, -4.509306e+00, -6.162727e+00, -6.585027e+00,  1.100000e-03, -3.900000e-01]+list(eps))
+        theta = pd.Series(list(th)+[7.397940e+00, -3.682371e+00, -4.509306e+00, -6.162727e+00, -6.585027e+00,  1.100000e-03, -3.900000e-01]+list(eps))
         theta.index = ['logK_on_TN', 'logK_on_TC', 'logK_on_RN', 'logK_on_RC', 'logK_D_TN', 'logK_D_TC', 'logK_D_RN', 'logK_D_RC', 'm_alpha', 'alpha0'] + ['epsilon' + str(i) for i in np.arange(0,94)]
         x_model = get_fratio_model(theta)
         x = [list(x_model[i].iloc[:,1]) for i in range(len(x_model))]
@@ -126,10 +126,14 @@ def calc_summ(d):
 
     #return out + np.random.rand(6*len(d))
 
-    for i in d['data'][:1]:
+    for i in d['data']:
+        stats = []
+        for j in i[:1]:
+            stats = stats.append(np.mean(j[-10:]))
+            stats = stats.append(np.max(j))
 
         #out = np.asarray([(np.max(j) - np.mean(j[-10:])) for j in i[:25]]).flatten()
-        out = np.asarray(i).flatten()
+        out = np.asarray(stats).flatten()
         if np.isnan(out).any() or np.isinf(out).any():
             print('Summary Failed!')
             comp_d.append(np.zeros(out.shape[0]))
