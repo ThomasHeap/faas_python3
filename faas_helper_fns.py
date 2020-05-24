@@ -129,8 +129,8 @@ def calc_summ(d):
     for i in d['data']:
         stats = []
         for j in i[:1]:
-            stats = stats.append(np.mean(j[-10:]))
-            stats = stats.append(np.max(j))
+            stats.append(np.mean(j[-10:]))
+            stats.append(np.max(j))
 
         #out = np.asarray([(np.max(j) - np.mean(j[-10:])) for j in i[:25]]).flatten()
         out = np.asarray(stats).flatten()
