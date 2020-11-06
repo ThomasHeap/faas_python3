@@ -24,7 +24,7 @@ class faas_Model():
 
         # Derivative of the covariance matrix
         self.n_sn = len(self.C)
-        #self.dCdt = np.zeros((self.npar, self.n_sn, self.n_sn))
+        
 
         # N data points
         self.ndata = 6*94
@@ -57,9 +57,9 @@ class faas_Model():
         ## note that t=0 is present
 
         x_model = self.rget_fratio_model(theta)
-        #print(x_model[0].iloc[:,1])
+
         x = [list(x_model[i].iloc[:,1]) for i in range(len(x_model))]
-        #print(x[0])
+
         length = max(map(len, x))
         fra=np.array([xi+[xi[-1]]*(length-len(xi)) for xi in x])[:,1:]
 
