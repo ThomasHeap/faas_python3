@@ -52,6 +52,19 @@ def func(id,thetaf):
 
 ## iterate through all batch_ids
 def get_fratio_model(theta, ids=batch_tab.loc[batch_tab.batch_id.isin(batch_ids)]['expVec']):
+#     with get_context("forkserver").Pool() as pool:
+#         ## determine the experiment IDs and the batch name
+#         ids = ids.reset_index(drop=True)
+#         #ids = [0]
+#         ## iterate through all experiments
+#         ## run script that computes post-flash simulation, the F-ratio and the sensitivity based Hessian
+#         theta = log10Kd_to_K(theta)
+#         functheta = partial(func, thetaf=theta)
+
+#         out = pool.map(functheta, ids)
+#         pool.close()
+#         pool.join()
+#         return out
     theta = log10Kd_to_K(theta)
     #with get_context("forkserver").Pool() as pool:
     ## determine the experiment IDs and the batch name
